@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<div id="response"></div>
+    </body>
+
+<script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"></script>
+
+  <script>
+  json={'fornitore':2,'cantiere':24,'tipologia':'NO','data_ordine':'2026-5-23','data_consegna':'2033-03-03','permagazzino':true,
+  'articoli':[{'id':3,'descrizione': 'mattoni 30x30','quantita': 30,'prezzo_unitario':0.20,'preleva':45},
+              {'id': 4,'descrizione': 'Sassi','quantita': 30,'prezzo_unitario': 1.50,'preleva':15}]}
+
+$.ajax({
+  url: "/api/ordinecreate",
+  method:'post',
+contentType: "application/json; charset=utf-8",
+data: JSON.stringify(json),
+  success: function( result ) {
+    console.log(result)
+    $( "#response" ).html( "<strong>" + result + "</strong> " );
+  }
+}).fail(function (error) {
+    console.log("Error retrieving token:", error);
+          });
+  </script>
+
+  </html>

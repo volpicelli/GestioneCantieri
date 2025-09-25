@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<div id="response"></div>
+    </body>
+    
+<script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"></script>
+
+  <script>
+$.ajaxSetup({ 
+     beforeSend: function(xhr, settings) {
+         function getCookie(name) {
+             var cookieValue = null;
+             if (document.cookie && document.cookie != '') {
+                 var cookies = document.cookie.split(';');
+                 for (var i = 0; i < cookies.length; i++) {
+                     var cookie = jQuery.trim(cookies[i]);
+                     // Does this cookie string begin with the name we want?
+                     if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                         cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                         break;
+                     }
+                 }
+             }
+             return cookieValue;
+         }
+         if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+             // Only send the token to relative URLs i.e. locally.
+             xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+         }
+     } 
+});
+
+json = {
+    
+        "id": 331,
+        "completato": false,
+        "data_ordine": "2025-05-20",
+        "data_consegna": "2025-05-28",
+        "importo": 555.3,
+        "damagazzino": true,
+        "permagazzino": false,
+        "tipologia": "MA",
+        "fornitore": 2,
+        "cantiere": 41,
+        "azienda": 1,
+    
+    "articoli": [
+        {
+            "id": 413,
+            "descrizione": "pallet",
+            "quantita": 100,
+            "prezzo_unitario": 0.23,
+            "importo_totale": 2.3000000000000003,
+            "ordine": 331
+        },
+        {
+            "id": 410,
+            "descrizione": "piastrelle",
+            "quantita": 50,
+            "prezzo_unitario": 41.25,
+            "importo_totale": 412.5,
+            "ordine": 331
+        },
+        {
+            "id": 412,
+            "descrizione": "mattoni 10x10",
+            "quantita": 100,
+            "prezzo_unitario": 0.45,
+            "importo_totale": 4.5,
+            "ordine": 331
+        }
+    ]
+}
+$.ajax({
+  url: "/api/ordineupdate/331",
+  method:'put',
+contentType: "application/json; charset=utf-8",
+data: JSON.stringify(json),
+  success: function( result ) {
+    console.log(result)
+  }
+}).fail(function (error) {
+    console.log("Error retrieving token:", error);
+          });
+
+
+  </script>
+
+  </html>

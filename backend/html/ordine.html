@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<div id="response"></div>
+    </body>
+
+<script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"></script>
+
+  <script>
+  json={'fornitore':2,'cantiere':16,'tipologia':2,'data_ordine':'2025-4-23',
+  'articoli':[{'descrizione': 'quest e una descrizione','quantita': 230,'prezzo_unitario':0.34},
+              {'descrizione': ' seconda ','quantita': 12,'prezzo_unitario': 12.4}]}
+
+$.ajax({
+  url: "/api/ordinecreate",
+  method:'post',
+contentType: "application/json; charset=utf-8",
+data: JSON.stringify(json),
+  success: function( result ) {
+    console.log(result)
+    $( "#response" ).html( "<strong>" + result + "</strong> " );
+  }
+}).fail(function (error) {
+    console.log("Error retrieving token:", error);
+          });
+  </script>
+
+  </html>

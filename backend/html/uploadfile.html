@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+
+<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+
+</head>
+<body>
+
+<form id="uploadForm"  method="POST" action="/api/file-upload/3" class="dropzone">
+    <div class="previewimgs"></div>
+    <div class="fallback">
+      <input name="file" type="file"  />
+    </div>
+    <button type="submit">Submit data and files!</button>
+
+  </form>
+
+</body>
+<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+<script>
+    Dropzone.options.uploadForm = { // The camelized version of the ID of the form element
+
+// The configuration we've talked about above
+autoProcessQueue: false,
+//uploadMultiple: true,
+//parallelUploads: 100,
+//maxFiles: 100,
+acceptedFiles: 'image/*,.pdf',
+//acceptedFiles: 'image/*',
+clickable: true,
+//previewsContainer: '#preview',
+addRemoveLinks: true,
+dictDefaultMessage: "Sposta qui i files o clicca per sceglierle" ,
+
+// The setting up of the dropzone
+init: function() {
+  var myDropzone = this;
+
+  // First change the button to actually tell Dropzone to process the queue.
+  this.element.querySelector("button[type=submit]").addEventListener("click", function(e) {
+    // Make sure that the form isn't actually being sent.
+    e.preventDefault();
+    e.stopPropagation();
+    myDropzone.processQueue();
+  });
+
+  // Listen to the sendingmultiple event. In this case, it's the sendingmultiple event instead
+  // of the sending event because uploadMultiple is set to true.
+  this.on("sendingmultiple", function() {
+    // Gets triggered when the form is actually being sent.
+    // Hide the success button or the complete form.
+  });
+  this.on("successmultiple", function(files, response) {
+    // Gets triggered when the files have successfully been sent.
+    // Redirect user or notify of success.
+  });
+  this.on("errormultiple", function(files, response) {
+    // Gets triggered when there was an error sending the files.
+    // Maybe show form again, and notify user of error
+    console.log(response)
+  });
+}
+//$("form#uploadForm").dropzone(Dropzone.options.uploadForm);
+
+}
+</script>
+</html>
+
+  
