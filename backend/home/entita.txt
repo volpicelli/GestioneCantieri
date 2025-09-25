@@ -1,0 +1,21 @@
+STRUTTURE DELLE ENTITA'
+Azienda ID: Identificativo (unico identificativo dell'azienda) Nome: String (nome dell'azienda) Descrizione: String (breve descrizione dell'azienda) Cantieri: Array[Cantieri] (lista di cantieri con chiave esterna di appartenenza all'azienda in questione) Lavoratori: Array[Lavoratori] (lista di lavoratori con chiave esterna di appartenenza all'azienda in questione) Fornitori: Array[Fornitori] (lista di fornitori con chiave esterna di appartenenza all'azienda in questione) Fatture: Array[Fatture] (lista di fatture con chiave esterna di appartenenza all'azienda in questione) Clienti: Array[Clienti] (lista di clienti con chiave esterna di appartenenza all'azienda in questione)
+
+Prendere dati da zucchetti
+
+Fornitore: ID: Identificativo Nome: String Indirizzo: String Email: String Numero di telefono: String IBAN: String Banca: String Descrizione: String Lavori: Lista di lavori forniti (es. Carpentiere, Manovale)
+
+Prendere dati da zucchetti
+
+Cliente: Lista di oggetti Cliente ID: String Nome: String Cognome: String Indirizzo: String Data di nascita: Date Numero di telefono: String Banca: String IBAN: String
+
+Articolo ID : Identificativo Nome : String Descrizione : String Importo : Number
+
+Fattura: ID: Identificativo Numero Fattura Fornitore: Number Fornitore: chiave esterna fornitore Data Fattura: Date Data Scadenza: Date Importo: Number Pagato: Number Cantiere: Array[Cantiere] chiave esterna per tutti i cantieri a cui quella fattura fa riferimento ( molteplici perchè possibilità di scorporare ) Articoli: Array[Articoli] Ordine di rif.: Ordine
+
+Ordine: ID: Identificativo Data Ordine: Date Fornitore: (Identificativo) Chiave esterna del fornitore da cui è stato effettuato ordine Articoli: Array[Articoli]
+
+Cantiere: ID: Identificativo Nome: String Descrizione: String Responsabile : Chiave esterna del responsabile del cantiere
+Data Inizio: Date Data Fine: Date Status: Boolean Fatture: Array[Fattura] (array di chiavi esterne delle fatture che hanno articoli facente parte del cantiere) Ordini: Array[Ordine] (array di chiavi esterne delle fatture che hanno articoli facente parte del cantiere) Lavoratori: Lista di oggetti Lavoratore ID: String Nome: String Cognome: String Lavoro: String Wage Lordo: String Wage Netto: String
+
+Responsabile: Id : Identificativo Nome : String Telefono : String Email : String

@@ -1,0 +1,132 @@
+from django.shortcuts import render
+from rest_framework.parsers import JSONParser
+from rest_framework.response import Response
+from rest_framework import status
+from django.http import FileResponse
+from rest_framework.views import APIView
+from rest_framework import generics
+from django.core import serializers
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework import exceptions
+from rest_framework.authentication import TokenAuthentication
+from home.models import *
+import json
+import logging
+
+
+class BancaClientiSync(APIView):
+    def post(self,request):
+        data = json.loads(request.body)
+        return Response(data)
+    
+class ClientiCondPagamentoSync(APIView):
+    def post(self,request):
+        data = json.loads(request.body)
+        return Response(data)
+    
+class ClientiSync(APIView):
+    authentication_classes = [TokenAuthentication]
+    #permission_classes = [IsAuthenticated]
+    #logger = logging.getLogger(__name__)
+    #authentication_classes = [TokenAuthentication]
+    """
+    json={'fornitore':2,
+        'cantiere':16,
+        'tipologia':'NO',
+        'data_ordine':'2026-5-23',
+        'damagazzino': false,
+        'permagazzino': false,
+        'articoli':[{'id':1,'descrizione': 'mattoni 40x40','quantita': 230,'prezzo_unitario':0.34,'preleva':12},
+                    {'id': 2,'descrizione': ' seconda ','quantita': 12,'prezzo_unitario': 12.4,'preleva':4}
+                    ]}
+
+    """
+    def post(self,request,azienda):
+        if  request.user.is_authenticated:
+            #return Response(" AUTENTICATO")
+        
+            ss = SyncDataFiles()
+            
+            ss.tabella = 'Cliente'
+
+            data = json.loads(request.body)
+            update = data['to_update']
+            lenupd = len(update)
+            add = data['to_add']
+            lenadd=len(add)
+            todelete = data['to_delete']
+            lendel = len(todelete)
+            ss.json_update = update
+            ss.json_delete = todelete
+            ss.json_add = add
+            ss.save()
+
+            aa=[]
+            for one in update:
+                #a= 2 #one['azienda']
+                #one.pop['azienda']
+                #one['azienda_id'] = a
+                #one['cap'] = "MODIFICATO DUE VOLTE"
+                #g={}
+                boolobject = Cliente.objects.filter(codcf=one['codcf'],azienda=azienda).update(**one)
+                obj = Cliente.objects.get(codcf=one['codcf'],azienda=azienda)
+                log = SyncLog()
+                log.tabella='Cliente'
+                log.operazione='update'
+                log.uniquefield='codcf'
+                log.fieldvalue=one['codcf']
+                log.azienda= azienda
+                log.save()
+                #g['codcf']=obj.codcf
+                #g['id'] = obj.id
+                #g['cap'] = obj.cap
+                #self.logger.info("update cliente: %s", g['id'])
+                #aa.append(g)
+
+            for one in todelete:
+                obj = Cliente.objects.get(codcf=one['codcf'],azienda=azienda)#.delete()
+                log = SyncLog()
+                log.tabella='Cliente'
+                log.operazione='delete'
+                log.uniquefield='codcf'
+                log.fieldvalue=one['codcf']
+                log.azienda= azienda
+                log.save()
+            for one in add:
+                one['codcf']=one['codcf']+"_DEL"
+                one.pop('azienda')
+                one.pop('id')
+                a = Azienda.objects.get(pk=azienda)
+                #one['azienda']=azienda
+
+                c = Cliente.objects.create(**one)
+                c.azienda=a
+                c.save()
+                log = SyncLog()
+                log.tabella='Cliente'
+                log.operazione='add'
+                log.uniquefield='codcf'
+                log.fieldvalue=one['codcf']
+                log.azienda= azienda
+                log.save()
+                
+            """"
+            "a=[]
+            for one in data:
+                b={}
+                b['id']=one['id']
+                b['codcf']=one['codcf']
+                a.append(b)
+            """
+            g={}
+            g['to_add'] = "Added %d entries " %lenadd
+            #aa.append(g)
+            g['to_update'] = "Updated %d entries " %lenupd
+            #aa.append(g)
+            g['to_delete'] = "Deleted %d entries " %lendel
+            aa.append(g)
+
+            #os = Ordineserializer(o)
+            return Response(aa)
+        else:
+            return Response(" NO AUTENTICATO")

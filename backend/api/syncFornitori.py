@@ -1,0 +1,143 @@
+from django.shortcuts import render
+from rest_framework.parsers import JSONParser
+from rest_framework.response import Response
+from rest_framework import status
+from django.http import FileResponse
+from rest_framework.views import APIView
+from rest_framework import generics
+from django.core import serializers
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework import exceptions
+from rest_framework.authentication import TokenAuthentication
+
+import json
+from home.models import *
+
+
+
+
+
+    
+class FornitoriCondPagamentoSync(APIView):
+    def post(self,request):
+        data = json.loads(request.body)
+        return Response(data)
+    
+    
+class FornitoriSync(APIView):
+    authentication_classes = [TokenAuthentication]
+    #permission_classes = [IsAuthenticated]
+    #logger = logging.getLogger(__name__)
+    #authentication_classes = [TokenAuthentication]
+    """
+    json={'fornitore':2,
+        'cantiere':16,
+        'tipologia':'NO',
+        'data_ordine':'2026-5-23',
+        'damagazzino': false,
+        'permagazzino': false,
+        'articoli':[{'id':1,'descrizione': 'mattoni 40x40','quantita': 230,'prezzo_unitario':0.34,'preleva':12},
+                    {'id': 2,'descrizione': ' seconda ','quantita': 12,'prezzo_unitario': 12.4,'preleva':4}
+                    ]}
+
+    """
+    def post(self,request,azienda):
+        if  request.user.is_authenticated:
+            #return Response(" AUTENTICATO")
+       
+            a=Azienda.objects.get(pk=azienda)
+
+            ss = SyncDataFiles()
+            
+            ss.tabella = 'Fornitori'
+
+            data = json.loads(request.body)
+            update = data['to_update']
+            lenupd = len(update)
+            add = data['to_add']
+            lenadd=len(add)
+            todelete = data['to_delete']
+            lendel = len(todelete)
+
+            ss.json_update = update
+            ss.json_delete = todelete
+            ss.json_add = add
+            ss.save()
+            aa=[]
+            
+            for one in update:
+                if len(one['codpag']) > 2:  
+                    try:
+                        boolobject = Fornitori.objects.filter(codcf=one['codcf'],azienda=a).update(**one)
+                        obj = Fornitori.objects.get(codcf=one['codcf'],azienda=a)
+                        log = SyncLog()
+                        log.tabella='Fornitori'
+                        log.operazione='update'
+                        log.uniquefield='codcf'
+                        log.fieldvalue=one['codcf']
+                        log.azienda= azienda
+                        log.save()
+                    except:
+                        return Response("UPDATE"+one['codcf'])
+                        pass
+                
+            
+            for one in todelete:
+                if len(one['codpag']) > 2:
+                    try:
+                        obj = Fornitori.objects.get(codcf=one['codcf'],azienda=azienda)#.delete()
+                        log = SyncLog()
+                        log.tabella='Fornitori'
+                        log.operazione='delete'
+                        log.uniquefield='codcf'
+                        log.fieldvalue=one['codcf']
+                        log.azienda= azienda
+                        log.save()
+                    except:
+                        return Response("DELETE"+one['codcf'])
+                        pass
+            for one in add:
+                #one['codcf']=one['codcf']+"_DEL"
+                codpag= one['codpag']
+                one.pop('codpag')
+                one.pop('azienda')
+                #one.pop('id')
+                a = Azienda.objects.get(pk=azienda)
+                #one['azienda']=azienda
+
+                c = Fornitori.objects.create(**one)
+                if codpag is not None and len(codpag) > 2:
+                    try:
+                        cp = CondizioniPagamento.objects.get(codpag=codpag)
+                        c.azienda=a
+                        c.codpag = cp
+                        c.save()
+                    except:
+                        return Response("CODPAG NON ESISTE "+codpag + one['codcf'])
+                else:
+                    cp=None
+                #c.azienda=a
+                #c.codpag = cp
+                #c.save()
+                log = SyncLog()
+                log.tabella='Fornitori'
+                log.operazione='add'
+                log.uniquefield='codcf'
+                log.fieldvalue=one['codcf']
+                log.azienda= azienda
+                log.save()
+            
+
+            
+            g={}
+            g['to_add'] = "Added %d entries " %lenadd
+            #aa.append(g)
+            g['to_update'] = "Updated %d entries " %lenupd
+            #aa.append(g)
+            g['to_delete'] = "Deleted %d entries " %lendel
+            aa.append(g)
+
+            #os = Ordineserializer(o)
+            return Response(aa)
+        else:
+            return Response(" NO AUTENTICATO")
